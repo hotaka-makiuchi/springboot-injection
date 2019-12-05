@@ -18,9 +18,6 @@ public class FirstComponentService {
 
     @Autowired
     private IComponent firstComponent;
-    // public DemoService(IComponent secondComponent) {
-    //     this.component = secondComponent;
-    // }
     
     @PostConstruct
     public void execute() {
