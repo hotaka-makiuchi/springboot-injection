@@ -62,14 +62,98 @@ DIコンテナに登録したクラスでは、注入が使えるようになり
 動作は変わらないので、ここでは`@Autowired`を使っていきます。
 `@Autowired`で指定したインスタンスが注入されます。
 
+#### `@Autowired`の使い方
+
+##### 準備
+
+注入する方を作成します。  
+入れ替えを行いたいので、`interface`を使ったものにします。
 
 ```puml
-@startuml
-start
-:hoge;
-stop
-@enduml
+left to right direction
+
+interface ICommand {
+    void execute()
+}
+class FirstCommand 
+
+FirstCommand --|> ICommand
+SecondCommand --|> ICommand
 ```
+
+##### コンストラクタインジェクション
+
+コンストラクタに`@Autowired`をつけます。  
+この方法はSpringチームが推奨している方法ですが、フィールドがfinalにできることや、コンストラクタに別のインスタンスが指定できるところがメリットです。  
+
+```ConstructorAutowiredService.java
+@Slf4j
+@Service
+public class ConstructorAutowiredService {
+
+    private final IComponent component;
+
+    @Autowired
+    public ConstructorAutowiredService(IComponent secondComponent) {
+        this.component = secondComponent;
+    }
+
+    @PostConstruct
+    public void execute() {
+        log.info("execute()");
+        this.component.execute();
+    }
+}
+```
+
+コンストラクタの引数名（ここでは`secondComponent`）をクラス名のlower camelにすることで、自動的に`SecondComponent`を注入します。  
+ここを`firstComponent`とすることで、`FirstComponent`が注入されます。
+
+##### フィールドインジェクション
+
+フィールドに`@Autowired`をつけます。  
+わかりやすい方法です。  
+
+```FirstComponentService.java
+@Slf4j
+@Service
+public class FirstComponentService {
+
+    @Autowired
+    private IComponent firstComponent;
+    
+    @PostConstruct
+    public void execute() {
+        log.info("execute()");
+        this.firstComponent.execute();
+    }
+
+}
+```
+
+```SecondComponentService.java
+@Slf4j
+@Service
+public class SecondComponentService {
+
+    @Autowired
+    private IComponent secondComponent;
+    
+    @PostConstruct
+    public void execute() {
+        log.info("execute()");
+        this.secondComponent.execute();
+    }
+
+}
+```
+
+注入するクラスの判別は名前になるところは、コンストラクタインジェクションと同様です。
+
+##### セッターインジェクション
+
+名前の通り、セッターに`@Autowired`をつけるものです。  
+使い所が思いつかなかったので、サンプルはなしです。
 
 
 ## 参考資料
